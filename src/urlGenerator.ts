@@ -4,7 +4,10 @@ export type Config = {
 };
 
 function generateURL({ path, config, prefixPath }: { path: string; config: Config[]; prefixPath: string }) {
+  //URL constructor will take a path as first argument and a base url as second argument
+  //path in this case looks like "/platform/management/v1/api/test"
   const url = new URL(`${prefixPath}${path}`, "http://example.url.com");
+
   config.forEach((param) => {
     if (Array.isArray(param.value)) {
       param.value.forEach((arrayValue) => {
@@ -34,4 +37,5 @@ const url = generateURL({
   ],
 });
 
-console.log(url);
+//Example output:
+//http://example.url.com/platform/management/v1/api/test?PageSize=1000&PageNumber=1&Include=a&Include=b&Include=c
