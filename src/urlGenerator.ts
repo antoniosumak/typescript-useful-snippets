@@ -1,40 +1,35 @@
 export type Config = {
-  name: string;
-  value: string | string[];
+  [key: string]: string | string[] | number | number[];
 };
 
-function generateURL({ path, config, prefixPath }: { path: string; config: Config[]; prefixPath: string }) {
-  //URL constructor will take a path as first argument and a base url as second argument
-  //path in this case looks like "/platform/management/v1/api/test"
-  const url = new URL(`${prefixPath}${path}`, "http://example.url.com");
+function GenerateUrl({ path, config, prefixPath }: { path: string; config?: Config; prefixPath?: string }) {
+  const url = new URL(`${prefixPath}${path}`, process.env.VUE_APP_BASE_URL);
 
-  config.forEach((param) => {
-    if (Array.isArray(param.value)) {
-      param.value.forEach((arrayValue) => {
-        url.searchParams.append(param.name, arrayValue);
+  if (!config) {
+    return url.toString();
+  }
+
+  Object.entries(config).forEach((config: [string, string | number | string[] | number[]]) => {
+    if (Array.isArray(config[1])) {
+      config[1].forEach((value: string | number) => {
+        url.searchParams.append(String(config[0]), String(value));
       });
     } else {
-      url.searchParams.append(param.name, param.value);
+      url.searchParams.append(String(config[0]), String(config[1]));
     }
   });
 
   return url.toString();
 }
 
-const url = generateURL({
+const url = GenerateUrl({
   path: "/api/test",
   prefixPath: "/platform/management/v1",
-  config: [
-    {
-      name: "PageSize",
-      value: "1000",
-    },
-    {
-      name: "PageNumber",
-      value: "1",
-    },
-    { name: "Include", value: ["a", "b", "c"] },
-  ],
+  config: {
+    "PageSize": 1000,
+    "PageNumber": 1,
+    "Include": ["a", "b", "c"],
+  },
 });
 
 //Example output:
